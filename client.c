@@ -6,12 +6,13 @@
 /*   By: isahmed <isahmed@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/01/07 13:13:19 by isahmed           #+#    #+#             */
-/*   Updated: 2025/01/23 12:23:49 by isahmed          ###   ########.fr       */
+/*   Updated: 2025/01/23 17:44:35 by isahmed          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minitalk.h"
-volatile	int	g = 0;
+
+volatile int	g_val = 0;
 
 int	ft_atoi(const char *nptr)
 {
@@ -35,30 +36,10 @@ int	ft_atoi(const char *nptr)
 	return (sign * total);
 }
 
-// void	send_char(int pid, char c, int i)
-// {
-// 	if (i == 8)
-// 		return ;
-// 	send_char(pid, c>>1, i + 1);
-// 	usleep(10000);
-// 	if (c & 1)
-// 	{
-// 		kill(pid, SIGUSR1);
-// 		ft_printf("1");
-// 	}
-// 	else
-// 	{
-// 		kill(pid, SIGUSR2);
-// 		ft_printf("0");
-// 	}
-// 	pause();
-// }
-
 void	sig_handler(int sig)
 {
 	(void)sig;
-	g = 1;
-
+	g_val = 1;
 }
 
 void	send_char(int pid, char c)
@@ -69,13 +50,13 @@ void	send_char(int pid, char c)
 	i = 7;
 	while (i >= 0)
 	{
-		g = 0;
+		g_val = 0;
 		if ((c >> i) & 1)
 			kill(pid, SIGUSR1);
 		else
 			kill(pid, SIGUSR2);
 		j = 0;
-		while (j++ < 100 && !g)
+		while (j++ < 100 && !g_val)
 			usleep(100);
 		if (j >= 100)
 		{
@@ -84,7 +65,6 @@ void	send_char(int pid, char c)
 		}
 		i --;
 	}
-	
 }
 
 int	main(int ac, char *av[])
@@ -101,10 +81,7 @@ int	main(int ac, char *av[])
 	signal(SIGUSR1, sig_handler);
 	ft_printf("client: (%d)\n", pid);
 	while (msg[i] != '\0')
-	{
-		send_char(pid, msg[i]);
-		i ++;
-	}
+		send_char(pid, msg[i++]);
 	ft_printf("Message Sent Successfully");
 	return (0);
 }
